@@ -1,0 +1,84 @@
+//Configuración del generador de Prima Client
+generator client {
+  provider = "prisma-client-js"
+}
+
+//configuración de la base de datos (SQLite para desarrollo)
+datasource db {
+  provider = "sqlite"
+  url = env("DATABASE_URL")
+}
+
+// ========================
+// MODELOS PARA AUTENTICAR
+// ========================
+model Volunteer {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  password     String
+  name         String
+  lastName     String?
+  phone        String?
+  skills       String?
+  availability String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  enrollments  Enrollment[]
+  @@map("volunteers")
+}
+
+model Org {
+  id          Int       @id @default(autoincrement())
+  name        String
+  email       String    @unique
+  password    String
+  description String?
+  phone       String?
+  website     String?
+  city        String?
+  country     String?
+  verified    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  projects    Project[]
+  @@map("orgs")
+}
+
+// Placeholder para próximos sprints
+model Project {
+  id              Int       @id @default(autoincrement())
+  title           String
+  description     String
+  location        String
+  startDate       DateTime
+  endDate         DateTime
+  volunteersNeeded Int      @default(1)
+  status          String    @default("active")
+  category        String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  orgId Int
+  org   Org       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  enrollments Enrollment[]
+  @@map("projects")
+}
+
+model Enrollment {
+  id          Int       @id @default(autoincrement())
+  status      String    @default("pending")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  volunteerId Int
+  volunteer   Volunteer @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+
+  projectId   Int
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([volunteerId, projectId])
+  @@map("enrollments")
+}
