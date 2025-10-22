@@ -1,7 +1,11 @@
-import { IsEmail, IsOptional, IsString, MinLength } from "class-validator";
+import { IsEmail, IsOptional, IsString, MinLength, IsInt, Min, Max } from "class-validator";
 
 
 export class RegisterOngDto {
+    @IsOptional()
+    @IsInt({ message: 'El RUC debe ser un número' })
+    ruc?: number;
+
     @IsEmail({}, { message: 'Debe ser un email válido' })
     email: string;
 

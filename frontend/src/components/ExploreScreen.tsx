@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { apiRequest } from '../utils/api';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -14,68 +15,23 @@ export function ExploreScreen() {
   const [selectedDate, setSelectedDate] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
-  const events = [
-    {
-      id: 1,
-      title: 'Limpieza de Playa Pocitos',
-      organization: 'EcoUruguay',
-      description: 'Únete a nosotros para mantener nuestras playas limpias y proteger la vida marina.',
-      date: '15 Oct, 2024',
-      time: '09:00',
-      location: 'Playa Pocitos, Montevideo',
-      volunteers: 12,
-      maxVolunteers: 20,
-      category: 'cleanup',
-      difficulty: 'Fácil',
-      rating: 4.8,
-      image: '/api/placeholder/300/200'
-    },
-    {
-      id: 2,
-      title: 'Plantación de Árboles Nativos',
-      organization: 'Verde Futuro',
-      description: 'Ayuda a reforestar áreas urbanas con especies nativas para mejorar la calidad del aire.',
-      date: '18 Oct, 2024',
-      time: '08:00',
-      location: 'Parque Batlle, Montevideo',
-      volunteers: 8,
-      maxVolunteers: 15,
-      category: 'reforestation',
-      difficulty: 'Moderado',
-      rating: 4.9,
-      image: '/api/placeholder/300/200'
-    },
-    {
-      id: 3,
-      title: 'Taller de Reciclaje Comunitario',
-      organization: 'Recicla Montevideo',
-      description: 'Aprende técnicas de reciclaje y ayuda a clasificar materiales reciclables.',
-      date: '22 Oct, 2024',
-      time: '10:00',
-      location: 'Centro Comunitario Cordón',
-      volunteers: 5,
-      maxVolunteers: 10,
-      category: 'recycling',
-      difficulty: 'Fácil',
-      rating: 4.7,
-      image: '/api/placeholder/300/200'
-    },
-    {
-      id: 4,
-      title: 'Monitoreo de Biodiversidad',
-      organization: 'BioConserva',
-      description: 'Participa en el censo de especies en humedales para estudios de conservación.',
-      date: '25 Oct, 2024',
-      time: '07:00',
-      location: 'Humedales del Santa Lucía',
-      volunteers: 3,
-      maxVolunteers: 8,
-      category: 'conservation',
-      difficulty: 'Avanzado',
-      rating: 4.9,
-      image: '/api/placeholder/300/200'
-    }
-  ];
+  const [events, setEvents] = useState<any[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState(false);
+  const [errorEvents, setErrorEvents] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoadingEvents(true);
+    apiRequest('/projects')
+      .then((data) => {
+        setEvents(Array.isArray(data) ? data : []);
+        setErrorEvents(null);
+      })
+      .catch((err) => {
+        setErrorEvents(err.message || 'Error al cargar eventos');
+        setEvents([]);
+      })
+      .finally(() => setLoadingEvents(false));
+  }, []);
 
   const getIcon = (category: string) => {
     switch (category) {
@@ -293,7 +249,16 @@ export function ExploreScreen() {
           </Button>
         </div>
 
+        {loadingEvents && (
+          <div className="text-center py-6 text-muted-foreground">Cargando eventos...</div>
+        )}
+        {errorEvents && (
+          <div className="text-center py-6 text-red-500">{errorEvents}</div>
+        )}
         <div className="space-y-4">
+          {!loadingEvents && !errorEvents && filteredEvents.length === 0 && (
+            <div className="text-center py-6 text-muted-foreground">No hay eventos disponibles.</div>
+          )}
           {filteredEvents.map((event) => (
             <Card key={event.id} className="overflow-hidden hover:shadow-md transition-shadow">
               <CardContent className="p-0">
@@ -306,12 +271,12 @@ export function ExploreScreen() {
                   <div className="flex-1 p-4">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <h4 className="font-medium line-clamp-2">{event.title}</h4>
-                        <p className="text-sm text-muted-foreground">{event.organization}</p>
+                        <h4 className="font-medium line-clamp-2">{event.title || event.name}</h4>
+                        <p className="text-sm text-muted-foreground">{event.organization || event.orgName}</p>
                       </div>
                       <div className="flex items-center space-x-1">
                         <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                        <span className="text-xs">{event.rating}</span>
+                        <span className="text-xs">{event.rating || event.status}</span>
                       </div>
                     </div>
 
@@ -322,7 +287,7 @@ export function ExploreScreen() {
                     <div className="space-y-1 mb-3">
                       <div className="flex items-center text-xs text-muted-foreground">
                         <Calendar className="h-3 w-3 mr-1" />
-                        {event.date} • {event.time}
+                        {event.date || event.startDate} • {event.time || event.endDate}
                       </div>
                       <div className="flex items-center text-xs text-muted-foreground">
                         <MapPin className="h-3 w-3 mr-1" />
@@ -330,7 +295,7 @@ export function ExploreScreen() {
                       </div>
                       <div className="flex items-center text-xs text-muted-foreground">
                         <Users className="h-3 w-3 mr-1" />
-                        {event.volunteers}/{event.maxVolunteers} voluntarios
+                        {event.volunteersNeeded || event.volunteers}/{event.maxVolunteers} voluntarios
                       </div>
                     </div>
 

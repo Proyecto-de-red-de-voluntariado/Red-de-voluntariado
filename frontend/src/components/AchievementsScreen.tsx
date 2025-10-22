@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { apiRequest } from '../utils/api';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -72,35 +73,24 @@ export function AchievementsScreen() {
     }
   ];
 
-  const certificates = [
-    {
-      id: 1,
-      title: 'Certificado de Participación',
-      event: 'Limpieza de Playa Pocitos',
-      organization: 'EcoUruguay',
-      date: '15 Sep, 2024',
-      hours: 4,
-      type: 'participation'
-    },
-    {
-      id: 2,
-      title: 'Certificado de Liderazgo',
-      event: 'Plantación Comunitaria Parque Batlle',
-      organization: 'Verde Futuro',
-      date: '22 Sep, 2024',
-      hours: 6,
-      type: 'leadership'
-    },
-    {
-      id: 3,
-      title: 'Certificado de Excelencia',
-      event: 'Taller de Reciclaje Avanzado',
-      organization: 'Recicla Montevideo',
-      date: '28 Sep, 2024',
-      hours: 8,
-      type: 'excellence'
-    }
-  ];
+  const [certificates, setCertificates] = useState<any[]>([]);
+  const [loadingCertificates, setLoadingCertificates] = useState(false);
+  const [errorCertificates, setErrorCertificates] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoadingCertificates(true);
+    apiRequest('/certificates')
+      .then((data) => {
+        // Adaptar los datos si es necesario
+        setCertificates(Array.isArray(data) ? data : []);
+        setErrorCertificates(null);
+      })
+      .catch((err) => {
+        setErrorCertificates(err.message || 'Error al cargar certificados');
+        setCertificates([]);
+      })
+      .finally(() => setLoadingCertificates(false));
+  }, []);
 
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
@@ -206,7 +196,16 @@ export function AchievementsScreen() {
         </TabsContent>
 
         <TabsContent value="certificates" className="mt-6">
+          {loadingCertificates && (
+            <div className="text-center py-6 text-muted-foreground">Cargando certificados...</div>
+          )}
+          {errorCertificates && (
+            <div className="text-center py-6 text-red-500">{errorCertificates}</div>
+          )}
           <div className="space-y-4">
+            {!loadingCertificates && !errorCertificates && certificates.length === 0 && (
+              <div className="text-center py-6 text-muted-foreground">No hay certificados disponibles.</div>
+            )}
             {certificates.map((certificate) => (
               <Card key={certificate.id}>
                 <CardContent className="p-4">
@@ -216,20 +215,20 @@ export function AchievementsScreen() {
                         <Award className="h-5 w-5 text-white" />
                       </div>
                       <div>
-                        <h4 className="font-medium">{certificate.title}</h4>
-                        <p className="text-sm text-muted-foreground">{certificate.event}</p>
+                        <h4 className="font-medium">{certificate.title || certificate.name}</h4>
+                        <p className="text-sm text-muted-foreground">{certificate.event || certificate.projectTitle}</p>
                         <div className="flex items-center space-x-4 text-xs text-muted-foreground mt-1">
-                          <span>{certificate.organization}</span>
-                          <span>{certificate.date}</span>
-                          <span>{certificate.hours} horas</span>
+                          <span>{certificate.organization || certificate.orgName}</span>
+                          <span>{certificate.date || certificate.issuedAt}</span>
+                          <span>{certificate.hours || certificate.hoursCompleted || certificate.requiredHours} horas</span>
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Badge className={getCertificateColor(certificate.type)} variant="outline">
-                        {certificate.type === 'participation' && 'Participación'}
-                        {certificate.type === 'leadership' && 'Liderazgo'}
-                        {certificate.type === 'excellence' && 'Excelencia'}
+                      <Badge className={getCertificateColor(certificate.type || certificate.certificateType)} variant="outline">
+                        {(certificate.type || certificate.certificateType) === 'participation' && 'Participación'}
+                        {(certificate.type || certificate.certificateType) === 'leadership' && 'Liderazgo'}
+                        {(certificate.type || certificate.certificateType) === 'excellence' && 'Excelencia'}
                       </Badge>
                       <Button size="sm" variant="outline">
                         <Download className="h-3 w-3 mr-1" />

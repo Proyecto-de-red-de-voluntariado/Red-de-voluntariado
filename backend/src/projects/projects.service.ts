@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { QueryProjectsDto } from './dto/query-projects.dto';
+import { CreateProjectDto } from './dto/create-project.dto';
 
 @Injectable()
 export class ProjectsService {
@@ -56,6 +57,28 @@ export class ProjectsService {
   async findOne(id: number) {
     const project = await this.prisma.project.findUnique({ where: { id } });
     if (!project) throw new NotFoundException('Proyecto no encontrado');
+    return project;
+  }
+
+  async create(dto: CreateProjectDto) {
+    // Validación extra
+    if (!dto.title || !dto.description || !dto.location || !dto.startDate || !dto.endDate || !dto.volunteersNeeded || !dto.status || !dto.orgId) {
+      throw new BadRequestException('Faltan campos obligatorios');
+    }
+    // Persistencia
+    const project = await this.prisma.project.create({
+      data: {
+        title: dto.title,
+        description: dto.description,
+        location: dto.location,
+        startDate: new Date(dto.startDate),
+        endDate: new Date(dto.endDate),
+        volunteersNeeded: dto.volunteersNeeded,
+        status: dto.status,
+        category: dto.category ?? null,
+        orgId: dto.orgId,
+      },
+    });
     return project;
   }
 }

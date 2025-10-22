@@ -8,6 +8,7 @@ import { VolunteersModule } from './volunteers/volunteers.module';
 import { OrgsModule } from './orgs/orgs.module';
 import { ProjectsModule } from './projects/projects.module';
 import { MailerModule } from './mailer/mailer.module';
+import { CertificatesModule } from './certificates/certificates.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { MailerModule } from './mailer/mailer.module';
     OrgsModule,
     ProjectsModule,
     MailerModule,
+  CertificatesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

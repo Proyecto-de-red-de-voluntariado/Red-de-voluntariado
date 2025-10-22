@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { apiRequest, setAuthToken } from '../utils/api';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -33,7 +34,20 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
 
   const handleVolunteerLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin('volunteer', { email: formData.email });
+    apiRequest('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+      }),
+    })
+      .then((data) => {
+        setAuthToken(data.access_token);
+        onLogin('volunteer', { email: formData.email });
+      })
+      .catch((err) => {
+        alert(err.message || 'Error al iniciar sesión');
+      });
   };
 
   const handleVolunteerSignup = (e: React.FormEvent) => {
@@ -42,12 +56,39 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
       alert('Las contraseñas no coinciden');
       return;
     }
-    onLogin('volunteer', { email: formData.email, isNewUser: true });
+    apiRequest('/auth/register/volunteer', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+        name: formData.email.split('@')[0],
+      }),
+    })
+      .then((data) => {
+        setAuthToken(data.access_token);
+        onLogin('volunteer', { email: formData.email, isNewUser: true });
+      })
+      .catch((err) => {
+        alert(err.message || 'Error al registrar voluntario');
+      });
   };
 
   const handleNgoLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin('ngo', { email: formData.corporateEmail, status: 'approved' });
+    apiRequest('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: formData.corporateEmail,
+        password: formData.password,
+      }),
+    })
+      .then((data) => {
+        setAuthToken(data.access_token);
+        onLogin('ngo', { email: formData.corporateEmail, status: 'approved' });
+      })
+      .catch((err) => {
+        alert(err.message || 'Error al iniciar sesión ONG');
+      });
   };
 
   const handleNgoSignup = (e: React.FormEvent) => {
@@ -60,9 +101,24 @@ export function AuthScreen({ onLogin }: AuthScreenProps) {
       }
       setStep(2);
     } else if (step === 2) {
-      // Enviar para validación
-      setNgoValidationStatus('pending');
-      setStep(3);
+      // Registro ONG en backend
+      apiRequest('/auth/register/ong', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: formData.organizationName,
+          email: formData.corporateEmail,
+          password: formData.password,
+          ruc: formData.ruc ? parseInt(formData.ruc, 10) : undefined,
+        }),
+      })
+        .then((data) => {
+          setAuthToken(data.access_token);
+          setNgoValidationStatus('pending');
+          setStep(3);
+        })
+        .catch((err) => {
+          alert(err.message || 'Error al registrar ONG');
+        });
     }
   };
 

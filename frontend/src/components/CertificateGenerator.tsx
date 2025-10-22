@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Download, Award, Calendar, Clock, MapPin, Leaf } from 'lucide-react';
+import { apiRequest } from '../utils/api';
 
 interface Certificate {
   id: string;
@@ -25,6 +27,26 @@ interface CertificateGeneratorProps {
 }
 
 export function CertificateGenerator({ certificate, onDownload }: CertificateGeneratorProps) {
+  // Ejemplo de integración real: obtener certificado por ID
+  const [cert, setCert] = useState<Certificate | null>(certificate || null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!certificate?.id) return;
+    setLoading(true);
+    apiRequest(`/certificates/${certificate.id}`)
+      .then((data) => {
+        setCert(data);
+        setError(null);
+      })
+      .catch((err) => {
+        setError(err.message || 'Error al cargar certificado');
+        setCert(null);
+      })
+      .finally(() => setLoading(false));
+  }, [certificate?.id]);
+
   const getCertificateTypeInfo = (type: string) => {
     switch (type) {
       case 'leadership':
@@ -48,11 +70,21 @@ export function CertificateGenerator({ certificate, onDownload }: CertificateGen
     }
   };
 
-  const typeInfo = getCertificateTypeInfo(certificate.certificateType);
+  if (loading) {
+    return <div className="text-center py-6 text-muted-foreground">Cargando certificado...</div>;
+  }
+  if (error) {
+    return <div className="text-center py-6 text-red-500">{error}</div>;
+  }
+  if (!cert) {
+    return <div className="text-center py-6 text-muted-foreground">No se encontró el certificado.</div>;
+  }
+
+  const typeInfo = getCertificateTypeInfo(cert.certificateType);
 
   const handleDownloadPDF = () => {
     // Aquí implementarías la generación del PDF
-    console.log('Generando PDF para certificado:', certificate.id);
+    console.log('Generando PDF para certificado:', cert.id);
     if (onDownload) onDownload();
   };
 
@@ -76,7 +108,7 @@ export function CertificateGenerator({ certificate, onDownload }: CertificateGen
             <div className="text-4xl mb-2">{typeInfo.icon}</div>
             <h2 className="text-xl font-bold mb-2">{typeInfo.title}</h2>
             <p className="text-sm text-muted-foreground">
-              Certificado N° {certificate.certificateNumber}
+              Certificado N° {cert.certificateNumber}
             </p>
           </div>
 
@@ -88,10 +120,10 @@ export function CertificateGenerator({ certificate, onDownload }: CertificateGen
             
             <div className="my-6">
               <h3 className="text-2xl font-bold text-primary mb-2">
-                {certificate.volunteerName}
+                {cert.volunteerName}
               </h3>
               <p className="text-sm text-muted-foreground">
-                {certificate.volunteerEmail}
+                {cert.volunteerEmail}
               </p>
             </div>
 
@@ -100,20 +132,20 @@ export function CertificateGenerator({ certificate, onDownload }: CertificateGen
             </p>
 
             <div className="bg-white/70 rounded-lg p-4 my-6">
-              <h4 className="font-semibold text-lg mb-2">{certificate.eventTitle}</h4>
+              <h4 className="font-semibold text-lg mb-2">{cert.eventTitle}</h4>
               
               <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center">
                   <Calendar className="h-4 w-4 mr-1" />
-                  {certificate.eventDate}
+                  {cert.eventDate}
                 </div>
                 <div className="flex items-center">
                   <MapPin className="h-4 w-4 mr-1" />
-                  {certificate.eventLocation}
+                  {cert.eventLocation}
                 </div>
                 <div className="flex items-center">
                   <Clock className="h-4 w-4 mr-1" />
-                  {certificate.hoursCompleted} horas
+                  {cert.hoursCompleted} horas
                 </div>
               </div>
             </div>
@@ -126,13 +158,13 @@ export function CertificateGenerator({ certificate, onDownload }: CertificateGen
             <div className="flex items-center justify-center mt-8 pt-4 border-t">
               <Avatar className="h-12 w-12 mr-3">
                 <AvatarFallback className="bg-primary text-white">
-                  {certificate.organizationName.charAt(0)}
+                  {cert.organizationName?.charAt(0)}
                 </AvatarFallback>
               </Avatar>
               <div className="text-left">
-                <p className="font-semibold">{certificate.organizationName}</p>
+                <p className="font-semibold">{cert.organizationName}</p>
                 <p className="text-sm text-muted-foreground">
-                  Emitido el {certificate.issueDate}
+                  Emitido el {cert.issueDate}
                 </p>
               </div>
             </div>
@@ -170,22 +202,22 @@ export function CertificateGenerator({ certificate, onDownload }: CertificateGen
           
           <div className="flex justify-between">
             <span className="text-muted-foreground">Número:</span>
-            <span className="font-mono text-sm">{certificate.certificateNumber}</span>
+            <span className="font-mono text-sm">{cert.certificateNumber}</span>
           </div>
           
           <div className="flex justify-between">
             <span className="text-muted-foreground">Fecha de emisión:</span>
-            <span>{certificate.issueDate}</span>
+            <span>{cert.issueDate}</span>
           </div>
           
           <div className="flex justify-between">
             <span className="text-muted-foreground">Horas completadas:</span>
-            <span>{certificate.hoursCompleted}h</span>
+            <span>{cert.hoursCompleted}h</span>
           </div>
           
           <div className="flex justify-between">
             <span className="text-muted-foreground">Organización emisora:</span>
-            <span>{certificate.organizationName}</span>
+            <span>{cert.organizationName}</span>
           </div>
         </CardContent>
       </Card>

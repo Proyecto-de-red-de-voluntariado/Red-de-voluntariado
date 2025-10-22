@@ -22,7 +22,7 @@ async function bootstrap() {
       transform: true, //Transforma los tipos automáticamente
     }),
   );
-  await app.listen(process.env.port ?? 3000);
-  console.log('Servidor corriendo en: http://localhost:${process.env.PORT ?? 3000}');
+  await app.listen(process.env.PORT ?? 3000);
+  console.log(`Servidor corriendo en: http://localhost:${process.env.PORT ?? 3000}`);
 }
 bootstrap();
