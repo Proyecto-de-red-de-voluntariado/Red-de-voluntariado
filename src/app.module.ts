@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { VolunteersModule } from './volunteers/volunteers.module';
 import { OrgsModule } from './orgs/orgs.module';
 import { ProjectsModule } from './projects/projects.module';
+import { MailerModule } from './mailer/mailer.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ProjectsModule } from './projects/projects.module';
     VolunteersModule,
     OrgsModule,
     ProjectsModule,
+    MailerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
