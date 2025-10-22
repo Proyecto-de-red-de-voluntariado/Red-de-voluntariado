@@ -6,6 +6,7 @@ import { PrismaModule } from './database/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { VolunteersModule } from './volunteers/volunteers.module';
 import { OrgsModule } from './orgs/orgs.module';
+import { ProjectsModule } from './projects/projects.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { OrgsModule } from './orgs/orgs.module';
     AuthModule, // ⬅️ Agregar aquí
     VolunteersModule,
     OrgsModule,
+    ProjectsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
