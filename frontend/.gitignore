@@ -1,0 +1,19 @@
+node_modules/
+dist/
+.env
+.vite/
+.DS_Store
+*.log
+.idea/
+.vscode/
+coverage/
+
+# archivos temporales
+*.tmp
+*.temp
+
+# sistema operativo
+Thumbs.db
+
+# build
+build/
