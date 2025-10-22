@@ -1,0 +1,58 @@
+# Red de Voluntariado Ambiental Backend
+
+Este proyecto es el backend de la aplicación "Red de Voluntariado Ambiental", desarrollada con NestJS. Su objetivo es facilitar la conexión entre voluntarios y ONGs ambientales a través de una plataforma digital.
+
+## Estructura del Proyecto
+
+El proyecto está organizado en módulos que representan diferentes funcionalidades de la aplicación:
+
+- **src/app.ts**: Punto de entrada de la aplicación, configura el entorno de NestJS.
+- **src/main.ts**: Inicia la aplicación NestJS y configura el servidor.
+- **src/app.module.ts**: Módulo raíz de la aplicación, donde se importan otros módulos necesarios.
+- **src/auth**: Módulo de autenticación que maneja el registro e inicio de sesión de usuarios.
+- **src/volunteers**: Módulo que gestiona la información de los voluntarios.
+- **src/orgs**: Módulo que gestiona la información de las ONGs.
+- **src/projects**: Módulo que gestiona los proyectos disponibles para voluntariado.
+- **src/enrollments**: Módulo que gestiona las inscripciones de los voluntarios a los proyectos.
+- **src/mailer**: Módulo que se encarga del envío de correos electrónicos, incluyendo confirmaciones de inscripción.
+
+## Instalación
+
+1. Clona el repositorio:
+   ```
+   git clone <URL_DEL_REPOSITORIO>
+   ```
+2. Navega al directorio del proyecto:
+   ```
+   cd red-voluntariado-backend
+   ```
+3. Instala las dependencias:
+   ```
+   npm install
+   ```
+4. Configura las variables de entorno. Copia el archivo `.env.example` a `.env` y ajusta los valores según tu entorno.
+
+## Uso
+
+Para iniciar el servidor de desarrollo, ejecuta:
+```
+npm run start:dev
+```
+
+## Endpoints
+
+El backend proporciona varios endpoints para interactuar con la plataforma:
+
+- **Autenticación**: Registro e inicio de sesión de voluntarios y ONGs.
+- **Voluntarios**: Crear, actualizar y obtener información de los voluntarios.
+- **ONGs**: Crear, actualizar y obtener información de las ONGs.
+- **Proyectos**: Crear, actualizar, obtener y filtrar proyectos disponibles.
+- **Inscripciones**: Inscribir voluntarios en proyectos y enviar confirmaciones por correo.
+
+## Contribuciones
+
+Las contribuciones son bienvenidas. Si deseas colaborar, por favor abre un issue o un pull request.
+
+## Licencia
+
+Este proyecto está bajo la Licencia MIT. Consulta el archivo LICENSE para más detalles.

@@ -1,0 +1,14 @@
+# dependencias y compilados
+node_modules
+dist
+
+# entorno y BD local
+.env
+.env.*.local
+prisma/dev.db
+prisma/dev.db-journal
+
+# sistema/IDE
+.DS_Store
+Thumbs.db
+.vscode/
